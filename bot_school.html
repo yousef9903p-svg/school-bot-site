@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الغياب المدرسي</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .menu button {
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu button:hover {
+            background-color: #2980b9;
+        }
+        
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #27ae60;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e8f4fc;
+            border-right: 4px solid #3498db;
+        }
+        
+        .error {
+            background-color: #fde8e8;
+            border-right: 4px solid #e74c3c;
+        }
+        
+        .success {
+            background-color: #e8f8ef;
+            border-right: 4px solid #2ecc71;
+        }
+        
+        .student-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .class-card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .class-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .student-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .absence-dates {
+            font-size: 0.9em;
+            color: #e74c3c;
+            margin-top: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .menu {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>نظام إدارة الغياب المدرسي</h1>
+            <p>مرحبًا بك في نظام إدارة الحضور والغياب للمدرسة</p>
+        </header>
+        
+        <div class="menu">
+            <button onclick="showSection('addStudent')">إضافة طالب</button>
+            <button onclick="showSection('removeStudent')">حذف طالب</button>
+            <button onclick="showSection('markAbsence')">تسجيل الغياب</button>
+            <button onclick="showSection('showStudent')">عرض الطالب وصفه</button>
+            <button onclick="showSection('showAbsence')">عرض الغياب</button>
+            <button onclick="showSection('viewAll')">عرض جميع الطلاب</button>
+        </div>
+        
+        <div class="content" id="content">
+            <div id="welcome">
+                <h2>مرحبًا بك!</h2>
+                <p>اختر أحد الخيارات من القائمة أعلاه للبدء.</p>
+            </div>
+            
+            <!-- إضافة طالب -->
+            <div id="addStudent" class="section" style="display: none;">
+                <h2>إضافة طالب جديد</h2>
+                <div class="form-group">
+                    <label for="studentName">اسم الطالب:</label>
+                    <input type="text" id="studentName" placeholder="أدخل اسم الطالب">
+                </div>
+                <div class="form-group">
+                    <label for="studentClass">الصف:</label>
+                    <select id="studentClass">
+                        <option value="">اختر الصف</option>
+                        <option value="6/1">6/1</option>
+                        <option value="6/2">6/2</option>
+                        <option value="6/3">6/3</option>
+                        <option value="6/4">6/4</option>
+                        <option value="7/1">7/1</option>
+                        <option value="7/2">7/2</option>
+                        <option value="7/3">7/3</option>
+                        <option value="7/4">7/4</option>
+                        <option value="8/1">8/1</option>
+                        <option value="8/2">8/2</option>
+                        <option value="8/3">8/3</option>
+                        <option value="8/4">8/4</option>
+                        <option value="9/1">9/1</option>
+                        <option value="9/2">9/2</option>
+                        <option value="9/3">9/3</option>
+                        <option value="9/4">9/4</option>
+                    </select>
+                </div>
+                <button onclick="addStudent()">إضافة الطالب</button>
+                <div id="addStudentResult"></div>
+            </div>
+            
+            <!-- حذف طالب -->
+            <div id="removeStudent" class="section" style="display: none;">
+                <h2>حذف طالب</h2>
+                <div class="form-group">
+                    <label for="removeStudentName">اسم الطالب:</label>
+                    <input type="text" id="removeStudentName" placeholder="أدخل اسم الطالب">
+                </div>
+                <div class="form-group">
+                    <label for="removeStudentClass">الصف:</label>
+                    <select id="removeStudentClass">
+                        <option value="">اختر الصف</option>
+                        <option value="6/1">6/1</option>
+                        <option value="6/2">6/2</option>
+                        <option value="6/3">6/3</option>
+                        <option value="6/4">6/4</option>
+                        <option value="7/1">7/1</option>
+                        <option value="7/2">7/2</option>
+                        <option value="7/3">7/3</option>
+                        <option value="7/4">7/4</option>
+                        <option value="8/1">8/1</option>
+                        <option value="8/2">8/2</option>
+                        <option value="8/3">8/3</option>
+                        <option value="8/4">8/4</option>
+                        <option value="9/1">9/1</option>
+                        <option value="9/2">9/2</option>
+                        <option value="9/3">9/3</option>
+                        <option value="9/4">9/4</option>
+                    </select>
+                </div>
+                <button onclick="removeStudent()">حذف الطالب</button>
+                <div id="removeStudentResult"></div>
+            </div>
+            
+            <!-- تسجيل الغياب -->
+            <div id="markAbsence" class="section" style="display: none;">
+                <h2>تسجيل غياب طالب</h2>
+                <div class="form-group">
+                    <label for="absenceStudentName">اسم الطالب:</label>
+                    <input type="text" id="absenceStudentName" placeholder="أدخل اسم الطالب">
+                </div>
+                <button onclick="markAbsence()">تسجيل الغياب</button>
+                <div id="markAbsenceResult"></div>
+            </div>
+            
+            <!-- عرض الطالب وصفه -->
+            <div id="showStudent" class="section" style="display: none;">
+                <h2>عرض الطالب وصفه</h2>
+                <div class="form-group">
+                    <label for="showStudentName">اسم الطالب:</label>
+                    <input type="text" id="showStudentName" placeholder="أدخل اسم الطالب">
+                </div>
+                <button onclick="showStudentClass()">عرض المعلومات</button>
+                <div id="showStudentResult"></div>
+            </div>
+            
+            <!-- عرض الغياب -->
+            <div id="showAbsence" class="section" style="display: none;">
+                <h2>عرض غياب الطالب</h2>
+                <div class="form-group">
+                    <label for="showAbsenceName">اسم الطالب:</label>
+                    <input type="text" id="showAbsenceName" placeholder="أدخل اسم الطالب">
+                </div>
+                <button onclick="showAbsence()">عرض الغياب</button>
+                <div id="showAbsenceResult"></div>
+            </div>
+            
+            <!-- عرض جميع الطلاب -->
+            <div id="viewAll" class="section" style="display: none;">
+                <h2>عرض جميع الطلاب</h2>
+                <button onclick="viewAllStudents()">عرض جميع الطلاب</button>
+                <div id="viewAllResult" class="student-list"></div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>نظام إدارة الغياب المدرسي &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // تهيئة البيانات
+        let classes = {};
+        let attendance = {};
+        
+        // تحميل البيانات من localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('schoolData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                classes = data.classes || {};
+                attendance = data.attendance || {};
+            } else {
+                // تهيئة البيانات الافتراضية
+                classes = {
+                    "6/1": [], "6/2": [], "6/3": [], "6/4": [],
+                    "7/1": [], "7/2": [], "7/3": [], "7/4": [],
+                    "8/1": [], "8/2": [], "8/3": [], "8/4": [],
+                    "9/1": [], "9/2": [], "9/3": [], "9/4": []
+                };
+                attendance = {};
+                for (const key in classes) {
+                    attendance[key] = {};
+                }
+                saveData();
+            }
+        }
+        
+        // حفظ البيانات في localStorage
+        function saveData() {
+            const data = {
+                classes: classes,
+                attendance: attendance
+            };
+            localStorage.setItem('schoolData', JSON.stringify(data));
+        }
+        
+        // الحصول على تاريخ اليوم
+        function getToday() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+        
+        // إظهار قسم معين وإخفاء الآخرين
+        function showSection(sectionId) {
+            // إخفاء جميع الأقسام
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // إخفاء رسالة الترحيب
+            document.getElementById('welcome').style.display = 'none';
+            
+            // إظهار القسم المطلوب
+            document.getElementById(sectionId).style.display = 'block';
+            
+            // مسح نتائج العمليات السابقة
+            const resultDivs = document.querySelectorAll('[id$="Result"]');
+            resultDivs.forEach(div => {
+                div.innerHTML = '';
+                div.className = '';
+            });
+        }
+        
+        // إضافة طالب
+        function addStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const studentClass = document.getElementById('studentClass').value;
+            
+            if (!name || !studentClass) {
+                showResult('addStudentResult', 'يرجى ملء جميع الحقول', 'error');
+                return;
+            }
+            
+            if (classes[studentClass].includes(name)) {
+                showResult('addStudentResult', 'الطالب موجود بالفعل في هذا الصف', 'error');
+                return;
+            }
+            
+            classes[studentClass].push(name);
+            saveData();
+            
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentClass').value = '';
+            
+            showResult('addStudentResult', `تم إضافة الطالب: ${name} في الصف: ${studentClass}`, 'success');
+        }
+        
+        // حذف طالب
+        function removeStudent() {
+            const name = document.getElementById('removeStudentName').value.trim();
+            const studentClass = document.getElementById('removeStudentClass').value;
+            
+            if (!name || !studentClass) {
+                showResult('removeStudentResult', 'يرجى ملء جميع الحقول', 'error');
+                return;
+            }
+            
+            if (classes[studentClass] && classes[studentClass].includes(name)) {
+                const index = classes[studentClass].indexOf(name);
+                classes[studentClass].splice(index, 1);
+                
+                // حذف سجل الغياب للطالب
+                if (attendance[studentClass] && attendance[studentClass][name]) {
+                    delete attendance[studentClass][name];
+                }
+                
+                saveData();
+                
+                document.getElementById('removeStudentName').value = '';
+                document.getElementById('removeStudentClass').value = '';
+                
+                showResult('removeStudentResult', 'تمت إزالة الطالب بنجاح', 'success');
+            } else {
+                showResult('removeStudentResult', 'الطالب أو الصف غير موجودين', 'error');
+            }
+        }
+        
+        // تسجيل الغياب
+        function markAbsence() {
+            const name = document.getElementById('absenceStudentName').value.trim();
+            const today = getToday();
+            let found = false;
+            
+            if (!name) {
+                showResult('markAbsenceResult', 'يرجى إدخال اسم الطالب', 'error');
+                return;
+            }
+            
+            for (const classroom in classes) {
+                if (classes[classroom].includes(name)) {
+                    if (!attendance[classroom][name]) {
+                        attendance[classroom][name] = [];
+                    }
+                    
+                    if (!attendance[classroom][name].includes(today)) {
+                        attendance[classroom][name].push(today);
+                    }
+                    
+                    saveData();
+                    document.getElementById('absenceStudentName').value = '';
+                    
+                    showResult('markAbsenceResult', `تم تسجيل غياب ${name} اليوم ${today} في الصف ${classroom}`, 'success');
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                showResult('markAbsenceResult', 'الطالب غير موجود في أي صف', 'error');
+            }
+        }
+        
+        // عرض الطالب وصفه
+        function showStudentClass() {
+            const name = document.getElementById('showStudentName').value.trim();
+            let found = false;
+            
+            if (!name) {
+                showResult('showStudentResult', 'يرجى إدخال اسم الطالب', 'error');
+                return;
+            }
+            
+            for (const classroom in classes) {
+                if (classes[classroom].includes(name)) {
+                    showResult('showStudentResult', `اسم الطالب: ${name} | الصف: ${classroom}`, 'success');
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                showResult('showStudentResult', 'الطالب غير موجود', 'error');
+            }
+        }
+        
+        // عرض الغياب
+        function showAbsence() {
+            const name = document.getElementById('showAbsenceName').value.trim();
+            let found = false;
+            
+            if (!name) {
+                showResult('showAbsenceResult', 'يرجى إدخال اسم الطالب', 'error');
+                return;
+            }
+            
+            for (const classroom in attendance) {
+                if (attendance[classroom][name]) {
+                    const absences = attendance[classroom][name].join(', ');
+                    showResult('showAbsenceResult', `غياب الطالب ${name} في الصف ${classroom}: ${absences}`, 'success');
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                showResult('showAbsenceResult', 'لا يوجد غياب مسجل لهذا الطالب', 'error');
+            }
+        }
+        
+        // عرض جميع الطلاب
+        function viewAllStudents() {
+            const resultDiv = document.getElementById('viewAllResult');
+            resultDiv.innerHTML = '';
+            
+            let hasStudents = false;
+            
+            for (const classroom in classes) {
+                if (classes[classroom].length > 0) {
+                    hasStudents = true;
+                    const classCard = document.createElement('div');
+                    classCard.className = 'class-card';
+                    
+                    const classTitle = document.createElement('div');
+                    classTitle.className = 'class-title';
+                    classTitle.textContent = `الصف: ${classroom}`;
+                    classCard.appendChild(classTitle);
+                    
+                    classes[classroom].forEach(student => {
+                        const studentItem = document.createElement('div');
+                        studentItem.className = 'student-item';
+                        studentItem.textContent = student;
+                        
+                        // عرض أيام الغياب إذا وجدت
+                        if (attendance[classroom] && attendance[classroom][student] && attendance[classroom][student].length > 0) {
+                            const absenceDates = document.createElement('div');
+                            absenceDates.className = 'absence-dates';
+                            absenceDates.textContent = `أيام الغياب: ${attendance[classroom][student].join(', ')}`;
+                            studentItem.appendChild(absenceDates);
+                        }
+                        
+                        classCard.appendChild(studentItem);
+                    });
+                    
+                    resultDiv.appendChild(classCard);
+                }
+            }
+            
+            if (!hasStudents) {
+                showResult('viewAllResult', 'لا يوجد طلاب مسجلين بعد', 'error');
+            }
+        }
+        
+        // دالة مساعدة لعرض النتائج
+        function showResult(elementId, message, type) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = message;
+            resultDiv.className = 'result';
+            
+            if (type === 'error') {
+                resultDiv.classList.add('error');
+            } else if (type === 'success') {
+                resultDiv.classList.add('success');
+            }
+        }
+        
+        // تهيئة التطبيق عند تحميل الصفحة
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
